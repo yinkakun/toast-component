@@ -44,5 +44,9 @@ export const useToast = () => {
     setToasts(newToasts);
   };
 
-  return { addNewToast, removeToast, toasts };
+  const removeAllToasts = () => {
+    setToasts([]);
+  };
+
+  return { addNewToast, removeToast, removeAllToasts, toasts };
 };
