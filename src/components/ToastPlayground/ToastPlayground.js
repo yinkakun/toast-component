@@ -1,23 +1,48 @@
 import React from "react";
 
 import Button from "../Button";
-import Toast from "../Toast/Toast";
+import ToastShelf from "../ToastShelf/ToastShelf";
 
 import styles from "./ToastPlayground.module.css";
 
 const VARIANT_OPTIONS = ["notice", "warning", "success", "error"];
 
 function ToastPlayground() {
-  const [message, setMessage] = React.useState("");
-  const [toastIsVisible, setToastIsVisible] = React.useState(false);
-  const [selectedVariant, setSelectedVariant] = React.useState("");
+  const [toasts, setToasts] = React.useState([]);
 
-  const hideToast = () => {
-    setToastIsVisible(false);
+  const [message, setMessage] = React.useState("");
+  const [variant, setVariant] = React.useState(VARIANT_OPTIONS[0]);
+
+  const addNewToast = (message, variant) => {
+    const newToasts = [
+      ...toasts,
+      {
+        message,
+        variant,
+        id: crypto.randomUUID(),
+      },
+    ];
+
+    setToasts(newToasts);
   };
 
-  const showToast = () => {
-    setToastIsVisible(true);
+  const removeToast = (id) => {
+    const newToasts = toasts.filter((toast) => {
+      return toast.id !== id;
+    });
+
+    setToasts(newToasts);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!message && !variant) return;
+
+    addNewToast(message, variant);
+
+    setMessage("");
+    setVariant(VARIANT_OPTIONS[0]);
   };
 
   return (
@@ -27,15 +52,9 @@ function ToastPlayground() {
         <h1>Toast Playground</h1>
       </header>
 
-      {toastIsVisible && (
-        <Toast
-          message={message}
-          hideToast={hideToast}
-          variant={selectedVariant}
-        />
-      )}
+      <ToastShelf toasts={toasts} removeToast={removeToast} />
 
-      <div className={styles.controlsWrapper}>
+      <form className={styles.controlsWrapper} onSubmit={handleSubmit}>
         <div className={styles.row}>
           <label
             htmlFor="message"
@@ -57,13 +76,13 @@ function ToastPlayground() {
         <div className={styles.row}>
           <div className={styles.label}>Variant</div>
           <div className={`${styles.inputWrapper} ${styles.radioWrapper}`}>
-            {VARIANT_OPTIONS.map((variant) => {
+            {VARIANT_OPTIONS.map((option) => {
               return (
                 <ToastVariant
-                  key={variant}
-                  variant={variant}
-                  setVariant={setSelectedVariant}
-                  isChecked={selectedVariant === variant}
+                  key={option}
+                  variant={option}
+                  setVariant={setVariant}
+                  isChecked={option === variant}
                 />
               );
             })}
@@ -73,10 +92,10 @@ function ToastPlayground() {
         <div className={styles.row}>
           <div className={styles.label} />
           <div className={`${styles.inputWrapper} ${styles.radioWrapper}`}>
-            <Button onClick={showToast}>Pop Toast!</Button>
+            <Button disabled={message.length < 1}>Pop Toast!</Button>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
